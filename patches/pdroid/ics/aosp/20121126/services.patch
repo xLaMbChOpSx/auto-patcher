@@ -1,0 +1,214 @@
+diff -Npru stock_services/smali/com/android/server/am/ActivityManagerService.smali moded_services/smali/com/android/server/am/ActivityManagerService.smali
+--- stock_services/smali/com/android/server/am/ActivityManagerService.smali	2012-06-24 14:05:08.302193026 -0700
++++ moded_services/smali/com/android/server/am/ActivityManagerService.smali	2012-06-24 14:05:17.920480751 -0700
+@@ -13345,6 +13345,118 @@
+     return-void
+ .end method
+ 
++.method private enforcePrivacyPermission(Ljava/lang/Object;Lcom/android/server/am/BroadcastRecord;)V
++    .registers 10
++
++    if-eqz p2, :cond_3c
++
++    iget-object v4, p2, Lcom/android/server/am/BroadcastRecord;->intent:Landroid/content/Intent;
++
++    if-eqz v4, :cond_3c
++
++    iget-object v4, p2, Lcom/android/server/am/BroadcastRecord;->intent:Landroid/content/Intent;
++
++    invoke-virtual {v4}, Landroid/content/Intent;->getAction()Ljava/lang/String;
++
++    move-result-object v4
++
++    if-eqz v4, :cond_3c
++
++    const/4 v2, 0x0
++
++    const/4 v3, -0x1
++
++    :try_start_10
++    instance-of v4, p1, Lcom/android/server/am/BroadcastFilter;
++
++    if-eqz v4, :cond_3d
++
++    move-object v0, p1
++
++    check-cast v0, Lcom/android/server/am/BroadcastFilter;
++
++    move-object v4, v0
++
++    iget-object v4, v4, Lcom/android/server/am/BroadcastFilter;->receiverList:Lcom/android/server/am/ReceiverList;
++
++    iget-object v4, v4, Lcom/android/server/am/ReceiverList;->app:Lcom/android/server/am/ProcessRecord;
++
++    iget-object v4, v4, Lcom/android/server/am/ProcessRecord;->info:Landroid/content/pm/ApplicationInfo;
++
++    iget-object v2, v4, Landroid/content/pm/ApplicationInfo;->packageName:Ljava/lang/String;
++
++    check-cast p1, Lcom/android/server/am/BroadcastFilter;
++
++    iget-object v4, p1, Lcom/android/server/am/BroadcastFilter;->receiverList:Lcom/android/server/am/ReceiverList;
++
++    iget-object v4, v4, Lcom/android/server/am/ReceiverList;->app:Lcom/android/server/am/ProcessRecord;
++
++    iget-object v4, v4, Lcom/android/server/am/ProcessRecord;->info:Landroid/content/pm/ApplicationInfo;
++
++    iget v3, v4, Landroid/content/pm/ApplicationInfo;->uid:I
++    :try_end_2a
++    .catch Ljava/lang/Exception; {:try_start_10 .. :try_end_2a} :catch_54
++
++    :cond_2a
++    :goto_2a
++    if-eqz v2, :cond_3c
++
++    const/4 v4, -0x1
++
++    if-eq v3, v4, :cond_3c
++
++    iget-object v4, p2, Lcom/android/server/am/BroadcastRecord;->intent:Landroid/content/Intent;
++
++    iget-object v5, p0, Lcom/android/server/am/ActivityManagerService;->mContext:Landroid/content/Context;
++
++    iget-object v6, p2, Lcom/android/server/am/BroadcastRecord;->receivers:Ljava/util/List;
++
++    invoke-interface {v6}, Ljava/util/List;->size()I
++
++    move-result v6
++
++    invoke-static {v2, v3, v4, v5, v6}, Landroid/privacy/surrogate/PrivacyActivityManagerService;->enforcePrivacyPermission(Ljava/lang/String;ILandroid/content/Intent;Landroid/content/Context;I)V
++
++    :cond_3c
++    :goto_3c
++    return-void
++
++    :cond_3d
++    :try_start_3d
++    instance-of v4, p1, Landroid/content/pm/ResolveInfo;
++
++    if-eqz v4, :cond_2a
++
++    move-object v0, p1
++
++    check-cast v0, Landroid/content/pm/ResolveInfo;
++
++    move-object v4, v0
++
++    iget-object v4, v4, Landroid/content/pm/ResolveInfo;->activityInfo:Landroid/content/pm/ActivityInfo;
++
++    iget-object v4, v4, Landroid/content/pm/ActivityInfo;->applicationInfo:Landroid/content/pm/ApplicationInfo;
++
++    iget-object v2, v4, Landroid/content/pm/ApplicationInfo;->packageName:Ljava/lang/String;
++
++    check-cast p1, Landroid/content/pm/ResolveInfo;
++
++    iget-object v4, p1, Landroid/content/pm/ResolveInfo;->activityInfo:Landroid/content/pm/ActivityInfo;
++
++    iget-object v4, v4, Landroid/content/pm/ActivityInfo;->applicationInfo:Landroid/content/pm/ApplicationInfo;
++
++    iget v3, v4, Landroid/content/pm/ApplicationInfo;->uid:I
++    :try_end_53
++    .catch Ljava/lang/Exception; {:try_start_3d .. :try_end_53} :catch_54
++
++    goto :goto_2a
++
++    :catch_54
++    move-exception v1
++
++    goto :goto_3c
++.end method
++
+ .method private final findAffinityTaskTopLocked(ILjava/lang/String;)I
+     .registers 10
+ 
+@@ -20947,6 +21059,14 @@
+ 
+     move-result-object v21
+ 
++    move-object/from16 v0, p0
++
++    move-object/from16 v1, v21
++
++    move-object/from16 v2, v26
++
++    invoke-direct {v0, v1, v2}, Lcom/android/server/am/ActivityManagerService;->enforcePrivacyPermission(Ljava/lang/Object;Lcom/android/server/am/BroadcastRecord;)V
++
+     move-object/from16 v0, v21
+ 
+     instance-of v3, v0, Lcom/android/server/am/BroadcastFilter;
+ 
+     if-eqz v3, :cond_28e
+ 
+     move-object/from16 v0, v21
+ 
+
+ .method private final processStartTimedOutLocked(Lcom/android/server/am/ProcessRecord;)V
+diff -Npru stock_services/smali/com/android/server/ServerThread.smali moded_services/smali/com/android/server/ServerThread.smali
+--- stock_services/smali/com/android/server/ServerThread.smali	2012-06-24 14:05:08.164160193 -0700
++++ moded_services/smali/com/android/server/ServerThread.smali	2012-06-24 14:05:17.652416992 -0700
+@@ -49,6 +49,41 @@
+     return-void
+ .end method
+ 
++.method private addPrivacyService(Landroid/content/Context;)V
++    .registers 5
++
++    :try_start_0
++    const-string v1, "SystemServer"
++
++    const-string v2, "Privacy Service"
++
++    invoke-static {v1, v2}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
++
++    const-string v1, "privacy"
++
++    new-instance v2, Landroid/privacy/PrivacySettingsManagerService;
++
++    invoke-direct {v2, p1}, Landroid/privacy/PrivacySettingsManagerService;-><init>(Landroid/content/Context;)V
++
++    invoke-static {v1, v2}, Landroid/os/ServiceManager;->addService(Ljava/lang/String;Landroid/os/IBinder;)V
++    :try_end_11
++    .catch Ljava/lang/Throwable; {:try_start_0 .. :try_end_11} :catch_12
++
++    :goto_11
++    return-void
++
++    :catch_12
++    move-exception v0
++
++    const-string v1, "SystemServer"
++
++    const-string v2, "Failure starting Privacy Service"
++
++    invoke-static {v1, v2, v0}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    goto :goto_11
++.end method
++
+ .method static final startSystemUi(Landroid/content/Context;)V
+     .registers 5
+ 
+@@ -479,20 +514,24 @@
+ 
+     move/from16 v0, v69
+ 
+     if-ne v0, v3, :cond_787
+ 
+     const/4 v3, 0x1
+ 
+     :goto_146
+     invoke-static {v4, v3}, Landroid/content/ContentService;->main(Landroid/content/Context;Z)Landroid/content/IContentService;
+ 
++    move-object/from16 v0, p0
++
++    invoke-direct {v0, v4}, Lcom/android/server/ServerThread;->addPrivacyService(Landroid/content/Context;)V
++
+     const-string v3, "SystemServer"
+ 
+     const-string v9, "System Content Providers"
+ 
+     invoke-static {v3, v9}, Landroid/util/Slog;->i(Ljava/lang/String;Ljava/lang/String;)I
+ 
+     invoke-static {}, Lcom/android/server/am/ActivityManagerService;->installSystemProviders()V
+ 
+     const-string v3, "SystemServer"
+ 

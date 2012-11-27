@@ -293,6 +293,39 @@ printtask () {
 	echo $@ | tee -a "$LOG"
 }
 
+patch_matcher () {
+        echo "Fixin' up fixen down fixin vixen."
+       # for f in ${FAIL[@]}; do # I don't think I need this 'for' loop. Already in a loop.
+                SMALI_PATCH=${FAIL##*/}.patch
+                CONTEXTIMPL=tmp/system/framework/framework.jar.out/smali/android/app
+                echo $P/$A/$R/$B/$SMALI_PATCH
+                STRIP=`echo ${FAIL##*/}`
+                echo "new strip variable is $STRIP"
+                        case "$STRIP" in
+                        ContextImpl\$20.smali)
+                                echo "So why not?"
+                                MATCH_STRING="Landroid/location/LocationManager"
+                                POSS_MATCH=$CONTEXTIMPL/ContextImpl*
+                                ;;
+                        ContextImpl\$29.smali)
+                                MATCH_STRING="Landroid/telephony/TelephonyManager"
+                                POSS_MATCH=$CONTEXTIMPL/ContextImpl*
+                                ;;
+                        esac
+                echo "Is this a problem here?"
+                NEW_MATCH=`grep -Hl $MATCH_STRING $POSS_MATCH`
+                echo "SMALI_PATCH is $SMALI_PATCH"
+                echo "FAIL is $FAIL"
+                echo "MATCH_STRING is $MATCH_STRING"
+                echo "NEW_MATCH is $NEW_MATCH"
+                echo "POSS_MATCH is $POSS_MATCH"
+   # for this test I am using CONTEXTIMPL, but I need to strip the file name off of FAIL
+                echo "For the patch function debug..."
+                echo "$NEW_MATCH < $PARB/\"$STRIP\".patch"
+                patch -Nl -p1 $NEW_MATCH < $PARB/"$STRIP".patch || cat tmp/$FILE.out/smali/${FAIL}.rej >> "$LOG" && print_error "That didn't work like you wanted it to brah!"
+       # done
+}
+
 copyfailed () {
 	echo ""
 	printtask "File for which patching failed:"
@@ -747,8 +780,15 @@ if [ $# -gt 2 ]; then
                         RID=aosp-ever;
                         ;;                
                 aosp*)
-			RID=`aosp_mod_check`;
-			;;
+                        case $ANDR in
+                                jellybean)
+			        RID=`aosp_mod_check`;
+			        ;;
+                                *)
+                                RID=aosp
+                                ;;
+                        esac
+                        ;;
                 201*)
                         date_error "You must specify ROMTYPE if designating a patch date!!"
                         ;;
@@ -1042,12 +1082,18 @@ else
 			esac
 			# substitute failed smali with premade jar
 			unset FAILS
-			FAILS=(`grep FAILED ${JAR}.log | sed -e 's/.*smali\///' | sed -e 's/\.rej//'`)
+			FAILS=(`grep FAILED ${JAR}.log | sed -e 's/.*smali\///' | sed -e "s/\.rej'//"`)
 			if [[ -n ${FAILS[@]} ]]; then
 				printtask "!!! PATCHING FAILED FOR ${FAILS[@]} !!!"
 				echo "### replace ${FAILS[@]} ###" > ${JAR}.log
 				for FAIL in ${FAILS[@]}; do
+                                        echo "JAR is $JAR"
+                                        echo "FAIL is $FAIL"
+                                        echo "FAIL@ is ${FAIL[@]}"
+                                        echo "NAME is $NAME"
+                                        echo "STRIP is ${FAIL##*/}"
 					echo "!!! patch error for $FAIL !!!" >> "$LOG"
+                                        patch_matcher
 					#cat tmp/$FILE.out/smali/${FAIL}.rej >> "$LOG"
 					[[ ${SID[@]} =~ $FAIL ]] && print_error "$FAIL was already replaced before"
 					[ -f patches/$P/$ANDR/provisionals/${FILE}.out/smali/${FAIL} ] || print_error "failed $FAIL in $JAR cannot be remedied"
