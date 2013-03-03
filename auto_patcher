@@ -728,7 +728,7 @@ proberom () {
 			              ;;
                         pa*)
                               echo "MID izzzzz $MID!"
-                              if [[ "$MID" == "pac"* ]]; then
+                              if [[ "$MID" == "pac"* ]] || [[ "$MID" == "PAC"* ]]; then
                                    echo "bummbubble"
                                    RID=".aosp-pac"
                               else
@@ -760,7 +760,7 @@ proberom () {
                          RID=aokp;
                          ;;
                     pa*)
-                         if [[ "$MID" == "pac"* ]]; then
+                         if [[ "$MID" == "pac"* ]] || [[ "$MID" == "PAC"* ]]; then
                               echo "bummbubble"
                               RID=".aosp-pac"
                          else
